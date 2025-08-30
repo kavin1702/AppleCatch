@@ -7,27 +7,37 @@ using TMPro;
 
 public class GameManager : MonoBehaviour
 {
+    public static GameManager instance; // Singleton
+
     [Header("Game Settings")]
     public int score = 0;
     public float gameTime = 30f;
     private float currentTime;
 
     [Header("UI Elements")]
+    public TMP_Text scoreText;
     public TMP_Text timerText;
     public GameObject gameOverPanel;
     public GameObject pauseMenuPanel;
-    [SerializeField] private AudioMixer audioMixer;
+
     [Header("Panels")]
     public GameObject audioSettingsPanel; // Drag your AudioSettings panel here
 
-    public Slider musicSlider;
-    public Slider sfxSlider;
-
     [Header("Audio")]
-    public AudioSource backgroundAudio; // background music
-    public AudioSource[] sfxAudios;     // assign your SFX AudioSources here
+    public AudioMixer audioMixer;        // Main Audio Mixer
+    public AudioSource backgroundAudio;  // Background music
+    public AudioSource[] sfxAudios;      // Assign your SFX sources here
+    public Slider musicSlider;           // UI slider for Music
+    public Slider sfxSlider;             // UI slider for SFX
 
     private bool isPaused = false;
+
+    void Awake()
+    {
+        // Singleton pattern
+        if (instance == null) instance = this;
+        else Destroy(gameObject);
+    }
 
     void Start()
     {
@@ -36,27 +46,33 @@ public class GameManager : MonoBehaviour
         gameOverPanel.SetActive(false);
         pauseMenuPanel.SetActive(false);
 
-        // Load saved values (or default 0.75f if none exist)
+        // Init score
+        scoreText.text = "Score : 0"; 
+
+        // Load saved audio values (default 0.75f)
         float savedMusic = PlayerPrefs.GetFloat("MusicVol", 0.75f);
         float savedSFX = PlayerPrefs.GetFloat("SFXVol", 0.75f);
 
-        musicSlider.value = savedMusic;
-        sfxSlider.value = savedSFX;
+        if (musicSlider != null)
+        {
+            musicSlider.value = savedMusic;
+            SetMusicVolume(savedMusic);
+            musicSlider.onValueChanged.AddListener(SetMusicVolume);
+        }
 
-        SetMusicVolume(savedMusic);
-        SetSFXVolume(savedSFX);
-
-        // Add listeners AFTER setting initial values
-        musicSlider.onValueChanged.AddListener(SetMusicVolume);
-        sfxSlider.onValueChanged.AddListener(SetSFXVolume);
+        if (sfxSlider != null)
+        {
+            sfxSlider.value = savedSFX;
+            SetSFXVolume(savedSFX);
+            sfxSlider.onValueChanged.AddListener(SetSFXVolume);
+        }
     }
-
 
     void Update()
     {
-     
-        currentTime -= Time.deltaTime; 
-        timerText.text = " " + Mathf.Ceil(currentTime);
+        // Countdown Timer
+        currentTime -= Time.deltaTime;
+        timerText.text = "" + Mathf.Ceil(currentTime);
 
         if (currentTime <= 0)
         {
@@ -64,7 +80,18 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // ================================
+    // SCORE FUNCTIONS
+    // ================================
+    public void IncreaseScore(int points)
+    {
+        score += points;
+        scoreText.text = "Score: " + score;
+    }
 
+    // ================================
+    // GAME FLOW FUNCTIONS
+    // ================================
     public void GameOver()
     {
         gameOverPanel.SetActive(true);
@@ -73,9 +100,8 @@ public class GameManager : MonoBehaviour
         if (backgroundAudio != null)
             backgroundAudio.Stop();
 
-        Time.timeScale = 0; // Pause the game
+        Time.timeScale = 0; // Pause game
     }
-
 
     public void RestartGame()
     {
@@ -86,9 +112,8 @@ public class GameManager : MonoBehaviour
     public void ReturnToMainMenu()
     {
         Time.timeScale = 1;
-        SceneManager.LoadScene("Main_Menu"); // make sure MainMenu is in Build Settings
+        SceneManager.LoadScene("Main_Menu"); // Make sure scene is in Build Settings
     }
-
 
     public void PauseGame()
     {
@@ -104,7 +129,6 @@ public class GameManager : MonoBehaviour
         isPaused = false;
     }
 
- 
     public void OpenAudioSettings()
     {
         audioSettingsPanel.SetActive(true);
@@ -115,25 +139,25 @@ public class GameManager : MonoBehaviour
         audioSettingsPanel.SetActive(false);
     }
 
-
     public void ShowPanelOfSlider()
     {
-        pauseMenuPanel. SetActive(true);
+        pauseMenuPanel.SetActive(true);
     }
+
+    // ================================
+    // AUDIO FUNCTIONS
+    // ================================
     public void SetMusicVolume(float value)
     {
-        if (value <= 0.0001f) value = 0.0001f; // prevent log(0) problem
-        audioMixer.SetFloat("Music", Mathf.Log10(value) * 20); // dB scale
-        PlayerPrefs.SetFloat("MusicVol", value); // save
+        if (value <= 0.0001f) value = 0.0001f; // prevent log(0)
+        audioMixer.SetFloat("MusicVolume ", Mathf.Log10(value) * 20); // dB scale
+        PlayerPrefs.SetFloat("MusicVolume", value);
     }
 
     public void SetSFXVolume(float value)
     {
         if (value <= 0.0001f) value = 0.0001f;
         audioMixer.SetFloat("SFX", Mathf.Log10(value) * 20);
-        PlayerPrefs.SetFloat("SFXVol", value);
+        PlayerPrefs.SetFloat("SFX", value);
     }
-
-
-
 }

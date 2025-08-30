@@ -61,12 +61,11 @@ public class playerCon : MonoBehaviour
         if (collision.collider.CompareTag("Ground"))
             IsGrounded = false;
     }
-
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("FallingObject"))
         {
-            ScoreManager.instance.IncreaseScore(1);
+            gameManager.IncreaseScore(1);
 
             // Play fruit collect sound
             if (audioSource != null && fruitCollectSFX != null)
@@ -82,10 +81,36 @@ public class playerCon : MonoBehaviour
 
             Debug.Log("Player hit the bomb!");
 
-            // Disable the player instead of destroying
             StartCoroutine(HandleGameOver());
         }
     }
+
+
+    //private void OnTriggerEnter2D(Collider2D other)
+    //{
+    //    if (other.CompareTag("FallingObject"))
+    //    {
+    //        gameManager.IncreaseScore(1);
+
+
+    //        // Play fruit collect sound
+    //        if (audioSource != null && fruitCollectSFX != null)
+    //            audioSource.PlayOneShot(fruitCollectSFX);
+
+    //        Destroy(other.gameObject);
+    //    }
+    //    else if (other.CompareTag("Bomb"))
+    //    {
+    //        // Play game over sound
+    //        if (audioSource != null && gameOverSFX != null)
+    //            audioSource.PlayOneShot(gameOverSFX);
+
+    //        Debug.Log("Player hit the bomb!");
+
+    //        // Disable the player instead of destroying
+    //        StartCoroutine(HandleGameOver());
+    //    }
+    //}
 
     private IEnumerator HandleGameOver()
     {
