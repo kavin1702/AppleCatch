@@ -1,4 +1,3 @@
-
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Audio;
@@ -7,34 +6,29 @@ using TMPro;
 
 public class GameManager : MonoBehaviour
 {
-    public static GameManager instance; // Singleton
+    public static GameManager instance;
 
-    [Header("Game Settings")]
     public int score = 0;
     public float gameTime = 30f;
     private float currentTime;
 
-    [Header("UI Elements")]
     public TMP_Text scoreText;
     public TMP_Text timerText;
     public GameObject gameOverPanel;
     public GameObject pauseMenuPanel;
 
-    [Header("Panels")]
-    public GameObject audioSettingsPanel; // Drag your AudioSettings panel here
+    public GameObject audioSettingsPanel;
 
-    [Header("Audio")]
-    public AudioMixer audioMixer;        // Main Audio Mixer
-    public AudioSource backgroundAudio;  // Background music
-    public AudioSource[] sfxAudios;      // Assign your SFX sources here
-    public Slider musicSlider;           // UI slider for Music
-    public Slider sfxSlider;             // UI slider for SFX
+    public AudioMixer audioMixer;
+    public AudioSource backgroundAudio;
+    public AudioSource[] sfxAudios;
+    public Slider musicSlider;
+    public Slider sfxSlider;
 
     private bool isPaused = false;
 
     void Awake()
     {
-        // Singleton pattern
         if (instance == null) instance = this;
         else Destroy(gameObject);
     }
@@ -46,10 +40,8 @@ public class GameManager : MonoBehaviour
         gameOverPanel.SetActive(false);
         pauseMenuPanel.SetActive(false);
 
-        // Init score
-        scoreText.text = "Score : 0"; 
+        scoreText.text = "Score : 0";
 
-        // Load saved audio values (default 0.75f)
         float savedMusic = PlayerPrefs.GetFloat("MusicVol", 0.75f);
         float savedSFX = PlayerPrefs.GetFloat("SFXVol", 0.75f);
 
@@ -70,7 +62,6 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        // Countdown Timer
         currentTime -= Time.deltaTime;
         timerText.text = "" + Mathf.Ceil(currentTime);
 
@@ -80,27 +71,20 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // ================================
-    // SCORE FUNCTIONS
-    // ================================
     public void IncreaseScore(int points)
     {
         score += points;
         scoreText.text = "Score: " + score;
     }
 
-    // ================================
-    // GAME FLOW FUNCTIONS
-    // ================================
     public void GameOver()
     {
         gameOverPanel.SetActive(true);
 
-        // Stop background music
         if (backgroundAudio != null)
             backgroundAudio.Stop();
 
-        Time.timeScale = 0; // Pause game
+        Time.timeScale = 0;
     }
 
     public void RestartGame()
@@ -112,7 +96,7 @@ public class GameManager : MonoBehaviour
     public void ReturnToMainMenu()
     {
         Time.timeScale = 1;
-        SceneManager.LoadScene("Main_Menu"); // Make sure scene is in Build Settings
+        SceneManager.LoadScene("Main_Menu");
     }
 
     public void PauseGame()
@@ -144,13 +128,10 @@ public class GameManager : MonoBehaviour
         pauseMenuPanel.SetActive(true);
     }
 
-    // ================================
-    // AUDIO FUNCTIONS
-    // ================================
     public void SetMusicVolume(float value)
     {
-        if (value <= 0.0001f) value = 0.0001f; // prevent log(0)
-        audioMixer.SetFloat("MusicVolume ", Mathf.Log10(value) * 20); // dB scale
+        if (value <= 0.0001f) value = 0.0001f;
+        audioMixer.SetFloat("MusicVolume ", Mathf.Log10(value) * 20);
         PlayerPrefs.SetFloat("MusicVolume", value);
     }
 

@@ -30,19 +30,15 @@ public class playerCon : MonoBehaviour
     {
         float moveInput = Input.GetAxis("Horizontal");
 
-        // Move the player using Rigidbody velocity
         rb.linearVelocity = new Vector2(moveInput * moveSpeed, rb.linearVelocity.y);
 
-        // Flip sprite
         if (moveInput > 0)
             spriteRenderer.flipX = false;
         else if (moveInput < 0)
             spriteRenderer.flipX = true;
 
-        // Running animation
         animator.SetBool("IsRunning", Mathf.Abs(moveInput) > 0.01f);
 
-        // Jump
         if (Input.GetKeyDown(KeyCode.Space) && IsGrounded)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
@@ -61,13 +57,13 @@ public class playerCon : MonoBehaviour
         if (collision.collider.CompareTag("Ground"))
             IsGrounded = false;
     }
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("FallingObject"))
         {
             gameManager.IncreaseScore(1);
 
-            // Play fruit collect sound
             if (audioSource != null && fruitCollectSFX != null)
                 audioSource.PlayOneShot(fruitCollectSFX);
 
@@ -75,55 +71,24 @@ public class playerCon : MonoBehaviour
         }
         else if (other.CompareTag("Bomb"))
         {
-            // Play game over sound
             if (audioSource != null && gameOverSFX != null)
                 audioSource.PlayOneShot(gameOverSFX);
 
             Debug.Log("Player hit the bomb!");
-
             StartCoroutine(HandleGameOver());
         }
     }
 
-
-    //private void OnTriggerEnter2D(Collider2D other)
-    //{
-    //    if (other.CompareTag("FallingObject"))
-    //    {
-    //        gameManager.IncreaseScore(1);
-
-
-    //        // Play fruit collect sound
-    //        if (audioSource != null && fruitCollectSFX != null)
-    //            audioSource.PlayOneShot(fruitCollectSFX);
-
-    //        Destroy(other.gameObject);
-    //    }
-    //    else if (other.CompareTag("Bomb"))
-    //    {
-    //        // Play game over sound
-    //        if (audioSource != null && gameOverSFX != null)
-    //            audioSource.PlayOneShot(gameOverSFX);
-
-    //        Debug.Log("Player hit the bomb!");
-
-    //        // Disable the player instead of destroying
-    //        StartCoroutine(HandleGameOver());
-    //    }
-    //}
-
     private IEnumerator HandleGameOver()
     {
-        // Disable player movement and physics immediately
-        this.enabled = false;          // disables this script (no more Update)
-        rb.simulated = false;          // stop physics
-        spriteRenderer.enabled = false; // hide sprite
+        this.enabled = false;
+        rb.simulated = false;
+        spriteRenderer.enabled = false;
 
-        // Wait for sound to finish
         float delay = (gameOverSFX != null) ? gameOverSFX.length : 0.5f;
         yield return new WaitForSecondsRealtime(delay);
 
-        // Now trigger the GameManager’s GameOver method
         gameManager.GameOver();
     }
 }
+    

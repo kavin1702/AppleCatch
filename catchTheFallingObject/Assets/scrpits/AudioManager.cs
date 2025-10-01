@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class AudioManager : MonoBehaviour
 {
     [Header("Mixer")]
-    public AudioMixer audioMixer; // Drag your Audio Mixer here in Inspector
+    public AudioMixer audioMixer;
 
     [Header("Sliders")]
     public Slider musicSlider;
@@ -13,7 +13,6 @@ public class AudioManager : MonoBehaviour
 
     void Start()
     {
-        // Load saved values or set defaults
         if (musicSlider != null)
         {
             float musicVol = PlayerPrefs.GetFloat("MusicVolume", 0.75f);
